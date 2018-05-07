@@ -28,23 +28,24 @@ const createTrip = (data) => (dispatch, getState) => {
     code: data
   }) 
   axios.post('/api/newTrip', data)
-    .then( (response) => {      
-      return axios.get('/api/tripId', {params: {id: data.ownerId}})
-    })
-    .then((response) => {
-      console.log('got new trip id: ', response);
-      let newTripId = response.data.id
-      return axios.post('/api/usersByTrips',{
-        newTripId: newTripId,
-        ownerId: data.ownerId
+    .then( () => {      
+      axios.get('/api/tripId', {params: {id: data.ownerId}})
+        .then((response) => {
+          console.log('got new trip id: ', response);
+          let newTripId = response.data.id
+          axios.post('/api/usersByTrips',{
+            newTripId: newTripId,
+            ownerId: data.ownerId
+          })
+            .then(() => {
+              console.log('pushing user to this trip: ', data);
+              dispatch(getAllTrips(data.ownerId))
+              dispatch(push(`/home`));              
+            })
       })
-    })
-    .then(() => {
-      dispatch(getAllTrips(data.ownerId))
     })
     .catch( (err) => {
     })
-  dispatch(push(`/trip/${data.name}`));
 
 }
 
